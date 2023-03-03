@@ -1,0 +1,15 @@
+{
+    "CHANNEL_ID":{"-1004442":23,"-10030445":12},
+    "CHANNEL_ID_COMMENTS":[-100444],
+    "VK_GROUP_ID":-91393,
+    "VK_USERTOKEN":"vk1.a.eTHNv9eFkTdXpB4CnplOvLi_Emvy56Wzj9iFNM4EDIeEj7bin4iGP6O-PmIW8IPipwy8BfKT3frEqpSO8ggknkQns7sdfQzR7qHFjPGjnA",
+    "API_ID":296,
+    "API_HASH":"81b",
+    "BLACK_LIST":["розыгрыш", "итоги розыгрыша", "конкурс", "победитель"],
+    "commentSettings":{
+        "howOftenMin":1, "howOftenMax":1, "firstMessageMin":1, "firstMessageMax":1, "secondMessageMin":1, "secondMessageMax":1, 
+        "answers":["Отлично!", "Ужасно...", "Я скоро умру..."],
+        "questions":["Привет! Как дела?", "Привет! Как дела? ДЕЛИШКИ!!"] 
+    },
+    "accs":["vk1.a.eYG24REy6"]
+}
