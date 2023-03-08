@@ -141,11 +141,20 @@ async def withPhotoes(client, message):
         weReciviedFirstPhoto = 1
         pictures = []
         await asyncio.sleep(20)
+        a1 = True
+        while a1 == True:
+            a2 = True
+            for file in os.listdir(os.fsencode("photoes/")):
+                filename = os.fsdecode(file)
+                if (filename[-4:] == "temp"):
+                    a2 = False
+                    await asyncio.sleep(2)
+                    break
+            if a2 == False:
+                continue
+            a1 = False
         for file in os.listdir(os.fsencode("photoes/")):
             filename = os.fsdecode(file)
-            while (filename[-4:] == "temp"):
-                await asyncio.sleep(2)
-                filename = os.fsdecode(file)
             logging.info(filename)
             pictures.append(f"photoes/{filename}")
         att = uploadPic(VK_GROUP_ID, pictures)
