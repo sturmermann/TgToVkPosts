@@ -9,7 +9,7 @@ CHANNEL_ID = settings["CHANNEL_ID"]
 CHANNEL_ID_COMMENTS = settings["CHANNEL_ID_COMMENTS"]
 VK_GROUP_ID = settings["VK_GROUP_ID"]
 VK_USERTOKEN = settings["VK_USERTOKEN"]
-VK_UERTOKEN_ANSWER = settings["VK_UERTOKEN_ANSWER"]
+VK_USERTOKEN_ANSWER = settings["VK_USERTOKEN_ANSWER"]
 API_ID = settings["API_ID"]
 API_HASH = settings["API_HASH"]
 BLACK_LIST = settings["BLACK_LIST"]
@@ -45,6 +45,8 @@ logging.info("программа стартует")
 @atexit.register
 def exitHan():
     logging.info("программа завершила работу")
+    with open("valid.txt", "w") as output:
+        output.write(str(accs))
     
 
 def uploadPic(peer_id, picNames):
@@ -77,7 +79,8 @@ async def commentsTheater(post_id, ex = 0):
         accs.remove(ppl)
         logging.error(k)
         logging.error(ppl)
-        return commentsTheater(post_id, ex = 1)
+        await commentsTheater(post_id, ex = 1)
+        return 0
     logging.info(k)
     await asyncio.sleep(random.randint(secondMessageMin, secondMessageMax))
     k = k["response"]["comment_id"]
@@ -128,13 +131,16 @@ async def withPhotoes(client, message):
             return
     topic_id = CHANNEL_ID[str(message.chat.id)]
     if not weReciviedFirstPhoto:
-        weReciviedFirstPhoto = 1
         for file in os.listdir(os.fsencode("photoes/")):
             filename = os.fsdecode(file)
             os.remove(f"photoes/{filename}")
-        await app.download_media(message, "photoes/")
+    else:
+        await asyncio.sleep(2)
+    await app.download_media(message, "photoes/")
+    if not weReciviedFirstPhoto:
+        weReciviedFirstPhoto = 1
         pictures = []
-        await asyncio.sleep(25)
+        await asyncio.sleep(20)
         for file in os.listdir(os.fsencode("photoes/")):
             filename = os.fsdecode(file)
             while (filename[-4:] == "temp"):
@@ -152,8 +158,5 @@ async def withPhotoes(client, message):
         weReciviedFirstPhoto = 0
         if message.chat.id in CHANNEL_ID_COMMENTS:
             await commentsTheater(k["response"]["post_id"])
-    else:
-        await asyncio.sleep(2)
-        await app.download_media(message, "photoes/")
             
 app.run()
