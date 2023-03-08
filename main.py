@@ -4,12 +4,12 @@ import requests, logging, atexit, json, os, asyncio, random
 
 with open("settings.json", "r") as settings:
     settings = json.load(settings)
-logging.basicConfig(filename="bot.log", level=logging.INFO, filemode="w")
 
 CHANNEL_ID = settings["CHANNEL_ID"]
 CHANNEL_ID_COMMENTS = settings["CHANNEL_ID_COMMENTS"]
 VK_GROUP_ID = settings["VK_GROUP_ID"]
 VK_USERTOKEN = settings["VK_USERTOKEN"]
+VK_UERTOKEN_ANSWER = settings["VK_UERTOKEN_ANSWER"]
 API_ID = settings["API_ID"]
 API_HASH = settings["API_HASH"]
 BLACK_LIST = settings["BLACK_LIST"]
@@ -26,12 +26,19 @@ answers = k["answers"]
 accs = settings["accs"]
 
 weReciviedFirstPhoto = 0
-posts = random.randint(howOftenMin, howOftenMax)
+posts = 1
 
 app = Client(
     "mainAccount",
     api_id=API_ID,
     api_hash=API_HASH
+)
+
+logging.basicConfig(
+    filename='bot.log',
+    level=logging.INFO,
+    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
 )
 
 logging.info("программа стартует")
@@ -63,8 +70,9 @@ async def commentsTheater(post_id, ex = 0):
         posts = random.randint(howOftenMin, howOftenMax)
         await asyncio.sleep(random.randint(firstMessageMin, firstMessageMax))
     ppl = accs[random.randint(0, len(accs)-1)]
-    msg = questions[random.randint(0, len(questions)-1)]
-    k = requests.get( f"https://api.vk.com/method/wall.createComment?owner_id={VK_GROUP_ID}&post_id={post_id}&message={msg}&access_token={ppl}&v=5.131").json()
+    msg = random.randint(0, len(questions)-1)
+    msg_1 = questions[msg]
+    k = requests.get( f"https://api.vk.com/method/wall.createComment?owner_id={VK_GROUP_ID}&post_id={post_id}&message={msg_1}&access_token={ppl}&v=5.131").json()
     if k.get("error", False):
         accs.remove(ppl)
         logging.error(k)
@@ -73,8 +81,8 @@ async def commentsTheater(post_id, ex = 0):
     logging.info(k)
     await asyncio.sleep(random.randint(secondMessageMin, secondMessageMax))
     k = k["response"]["comment_id"]
-    msg = answers[random.randint(0, len(answers)-1)]
-    k = requests.get( f"https://api.vk.com/method/wall.createComment?owner_id={VK_GROUP_ID}&from_group={VK_GROUP_ID*-1}&post_id={post_id}&message={msg}&access_token={VK_USERTOKEN}&reply_to_comment={k}&v=5.131").json()
+    msg_1 = answers[msg]
+    k = requests.get( f"https://api.vk.com/method/wall.createComment?owner_id={VK_GROUP_ID}&post_id={post_id}&message={msg_1}&access_token={VK_USERTOKEN_ANSWER}&reply_to_comment={k}&v=5.131").json()
     logging.info(k)
 
 
@@ -113,20 +121,25 @@ async def withPhotoes(client, message):
         nowText = message.caption
     else:
         nowText = ""
+    logging.info(f"С текстом: {nowText}")
     for i in BLACK_LIST:
         if i in nowText.lower():
             logging.info("Запрещенные слова")
             return
     topic_id = CHANNEL_ID[str(message.chat.id)]
-    await app.download_media(message, "photoes/")
     if not weReciviedFirstPhoto:
         weReciviedFirstPhoto = 1
+        for file in os.listdir(os.fsencode("photoes/")):
+            filename = os.fsdecode(file)
+            os.remove(f"photoes/{filename}")
+        await app.download_media(message, "photoes/")
         pictures = []
-        await asyncio.sleep(10)
+        await asyncio.sleep(25)
         for file in os.listdir(os.fsencode("photoes/")):
             filename = os.fsdecode(file)
             while (filename[-4:] == "temp"):
                 await asyncio.sleep(2)
+                filename = os.fsdecode(file)
             logging.info(filename)
             pictures.append(f"photoes/{filename}")
         att = uploadPic(VK_GROUP_ID, pictures)
@@ -139,5 +152,8 @@ async def withPhotoes(client, message):
         weReciviedFirstPhoto = 0
         if message.chat.id in CHANNEL_ID_COMMENTS:
             await commentsTheater(k["response"]["post_id"])
+    else:
+        await asyncio.sleep(2)
+        await app.download_media(message, "photoes/")
             
 app.run()
